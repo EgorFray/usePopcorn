@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
 	{
@@ -67,7 +67,8 @@ function Logo() {
 	);
 }
 
-function Search({ query, setQuery }) {
+function Search() {
+	const [query, setQuery] = useState("");
 	return (
 		<input
 			className="search"
@@ -82,7 +83,7 @@ function Search({ query, setQuery }) {
 function NumResults({ movies }) {
 	return (
 		<p className="num-results">
-			Found <strong>{movies?.length}</strong> results
+			Found <strong>{movies.length}</strong> results
 		</p>
 	);
 }
@@ -105,6 +106,7 @@ function Box({ children }) {
 }
 
 // function WatchedBox() {
+
 // 	const [isOpen2, setIsOpen2] = useState(true);
 
 // 	return (
@@ -212,55 +214,16 @@ function WatchedMovie({ movie }) {
 export default function App() {
 	const [movies, setMovies] = useState(tempMovieData);
 	const [watched, setWatched] = useState(tempWatchedData);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState("");
-	const [query, setQuery] = useState("");
-
-	const tempQuery = "interstellar";
-
-	useEffect(
-		function () {
-			async function fetchMovies() {
-				try {
-					setIsLoading(true);
-					setError("");
-					const res = await fetch(
-						`http://www.omdbapi.com/?i=tt3896198&apikey=60db7bff&s=${query}`
-					);
-					if (!res.ok) throw new Error("Something went wrong whil fetching movies");
-					const data = await res.json();
-					if (data.Response === "False") throw new Error(data.Error);
-					setMovies(data.Search);
-				} catch (err) {
-					setError(err.message);
-				} finally {
-					setIsLoading(false);
-				}
-			}
-			if (query.length < 3) {
-				setMovies([]);
-				setError("");
-				return;
-			}
-
-			fetchMovies();
-		},
-		[query]
-	);
 
 	return (
 		<>
 			<NavBar>
-				<Search query={query} setQuery={setQuery} />
+				<Search />
 				<NumResults movies={movies} />
 			</NavBar>
 			<Main>
 				<Box>
-					{isLoading && <Loader />}
-					{!isLoading && !error && <MovieList movies={movies} />}
-					{error && <ErrorMessage message={error} />}
-
-					{/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
+					<MovieList movies={movies} />
 				</Box>
 
 				<Box>
@@ -270,16 +233,4 @@ export default function App() {
 			</Main>
 		</>
 	);
-}
-
-function ErrorMessage({ message }) {
-	return (
-		<p className="error">
-			<span>⛔️</span> {message}
-		</p>
-	);
-}
-
-function Loader() {
-	return <p className="loader">Loading...</p>;
 }
